@@ -1,0 +1,11 @@
+main: net.plugin.code.OffhandAttack
+name: OffhandAttack
+version: 1.0.0
+author: Rёdginald
+api-version: 1.13
+description: nulll
+website: nullll
+commands:
+  ohatk:
+    description: Main command of the plugin.
+    usage: /ohatk
