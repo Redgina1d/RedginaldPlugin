@@ -36,10 +36,10 @@ public class OffhandAttack extends JavaPlugin {
     public void onEnable() {
     	instance = this;
     	if (hasProtocolLib()) {
-    		File file_tresk = new File(getDataFolder(), "default_config.yml");
-            if (!file_tresk.exists()) {
+    		File file_treski = new File(getDataFolder(), "default_config.yml");
+            if (!file_treski.exists()) {
             	try {
-					file_tresk.createNewFile();
+					file_treski.createNewFile();
 				} catch (IOException e) {
 					getLogger().log(Level.SEVERE, "ERROR: Failed to create file", e);
 				}
