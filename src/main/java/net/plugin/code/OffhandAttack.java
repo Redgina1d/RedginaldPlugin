@@ -57,6 +57,14 @@ public class OffhandAttack extends JavaPlugin {
                     e.printStackTrace();
                 }
             }
+            File playersfile = new File(getDataFolder(), "players_config.yml");
+            if (!playersfile.exists()) {
+            	try {
+            		playersfile.createNewFile();
+				} catch (IOException e) {
+					getLogger().log(Level.SEVERE, "ERROR: Failed to create file", e);
+				}
+            }
     		getLogger().info("OffhandAttack plugin is enabled. Enjoy the fun, my little Barbarians.");
     	} else {
     		getLogger().warning("You don't have ProtocolLib on your server! Disabling OffhandAttack plugin...");
