@@ -12,19 +12,24 @@ import java.util.Map;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
+
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.ProtocolLibrary;
+import com.comphenix.protocol.ProtocolManager;
+import com.comphenix.protocol.events.PacketContainer;
 
 public class OffhandAttack extends JavaPlugin {
 
     private static OffhandAttack instance;
 
-    private static OffhandAttack plugin;
-
     public static OffhandAttack getInstance() {
         return instance;
     }
     
+    private ProtocolManager protocolManager;
 
     private boolean hasProtocolLib() {
         PluginManager pluginManager = Bukkit.getPluginManager();
@@ -36,6 +41,7 @@ public class OffhandAttack extends JavaPlugin {
     public void onEnable() {
     	instance = this;
     	if (hasProtocolLib()) {
+    		protocolManager = ProtocolLibrary.getProtocolManager();
     		File file_treski = new File(getDataFolder(), "default_config.yml");
             if (!file_treski.exists()) {
             	try {
@@ -75,6 +81,22 @@ public class OffhandAttack extends JavaPlugin {
 
     @Override
     public void onDisable() {
+    	protocolManager = null;
     	getLogger().info("OffhandAttack plugin is disabled.");
+    }
+    public ProtocolManager getProtocolManager() {
+        return protocolManager;
+    }
+    public void animateOffHand(Player player) {
+        try {
+            PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.ANIMATION);
+            packet.getIntegers().write(0, player.getEntityId());
+            packet.getIntegers().write(1, 3); // 3 is code for second hand swing animation.
+            for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+                protocolManager.sendServerPacket(onlinePlayer, packet);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
