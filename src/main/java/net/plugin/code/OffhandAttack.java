@@ -36,7 +36,7 @@ public class OffhandAttack extends JavaPlugin {
         Plugin plugin = pluginManager.getPlugin("ProtocolLib");
         return plugin != null && plugin.isEnabled();
     }
-    
+
     @Override
     public void onEnable() {
     	instance = this;
@@ -50,9 +50,9 @@ public class OffhandAttack extends JavaPlugin {
 					getLogger().log(Level.SEVERE, "ERROR: Failed to create file", e);
 				}
                 Map<String, Object> data = new HashMap<>();
-                data.put("Attack speed penalty", 30);
-                data.put("Damage penalty", 30);
-                data.put("Default for all players", true);
+                data.put("Attack speed penalty (INTEGER)", 30);
+                data.put("Damage penalty (INTEGER)", 30);
+                data.put("Default for all players (1 for true, 0 for false)", 1);
                 DumperOptions options = new DumperOptions();
                 options.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
                 Yaml yaml = new Yaml(options);
