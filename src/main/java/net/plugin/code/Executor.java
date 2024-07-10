@@ -10,27 +10,46 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
-public class Executor extends OffhandAttack  implements CommandExecutor {
+public class Executor implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (sender instanceof Player) {
-        	switch (label.toLowerCase()) {
-			case "ohatk": {
-				if (args[0] == "engrave") {
-					return engrPlayerHand((Player) sender, args[1]);
-				}
-			}
-			default:
+    	switch (label.toLowerCase()) {
+		case "ohatk": {
+			if (args.length > 0) {
+				return engraveCmd(sender, args);
+			} else {
 				return false;
 			}
-        }
-        return false;
+		}
+		default: 
+			return false;
+    	}
     }
+    private boolean engraveCmd(CommandSender sender, String[] args) {
+    	Player player = (Player) sender;
+			if (player.getInventory().getItemInMainHand().getType() != Material.AIR) {
+	    		if (args[1].equals("add")) {
+	    			player.getInventory().setItemInMainHand(setEngrave(player.getInventory().getItemInMainHand(),(short) 1));
+	        		player.sendMessage("§6§l[OffhandAttack] §e- A special engrave was applied to your item. Now it can be swinged using second hand.");
+	        		return true;
+	    		} else if (args[1].equals("remove")) {
+	    			player.getInventory().setItemInMainHand(setEngrave(player.getInventory().getItemInMainHand(),(short) 0));
+	        		player.sendMessage("§6§l[OffhandAttack] §e- A special engrave was removed from your item.");
+	        		return true;
+	    		} else {
+	    			player.sendMessage("§6§l[OffhandAttack] §e- Invalid argument provided: " + args[1] + ". Use \"add\" or \"remove\".");
+	    			return false;
+	    		}
+	    	} else {
+	    		player.sendMessage("§6§l[OffhandAttack] §e- You don't have item in your hand!");
+	    		return false;
+	    	}
+	}
 
-    public ItemStack setEngrave(ItemStack item, short val) {
+    private ItemStack setEngrave(ItemStack item, short val) {
     	ItemMeta meta = item.getItemMeta();
-        NamespacedKey key = new NamespacedKey(instance, "offhand_atk");
+        NamespacedKey key = new NamespacedKey(OffhandAttack.instance, "offhand_atk");
     	if (val == 1) {
             meta.getPersistentDataContainer().set(key, PersistentDataType.STRING, "");
             item.setItemMeta(meta);
@@ -40,21 +59,5 @@ public class Executor extends OffhandAttack  implements CommandExecutor {
     	}
     	return item;
 	}
-    
-    private boolean engrPlayerHand(Player player, String value) {
-    	if (player.getInventory().getItemInMainHand().getType() != Material.AIR) {
-    		if (value == "add") {
-    			setEngrave(player.getInventory().getItemInMainHand(),(short) 1);
-        		player.sendMessage("§6§l[OffhandAttack[ §e- A special engrave was applied to your item. Now it can be swinged using second hand.");
-    		} else if (value == "remove") {
-    			setEngrave(player.getInventory().getItemInMainHand(),(short) 0);
-        		player.sendMessage("§6§l[OffhandAttack[ §e- A special engrave was removed from your item.");
-    		} else {
-    			player.sendMessage("§6§l[OffhandAttack[ §e- Invalid argument provided. Use \"add\" or \"remove\".");
-    		}
-    	} else {
-    		player.sendMessage("§6§l[OffhandAttack[ §e- You don't have item in your hand!");
-    	}
-		return true;
-    }
+
 }

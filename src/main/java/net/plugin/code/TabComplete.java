@@ -18,16 +18,7 @@ public class TabComplete implements TabCompleter {
                 completions.add("engrave");
                 completions.add("manage");
     		}
-            if (args.length == 2 && args[0] == "manage") {
-            	completions.add("player");
-            	completions.add("global");
-            }
-            if (args.length == 3) {
-            	completions.add("set_speed_penalty");
-            	completions.add("set_dmg_penalty");
-            }
-            return completions;
         }
-		return null;
+		return completions;
     }
 }

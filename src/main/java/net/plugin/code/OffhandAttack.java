@@ -12,44 +12,28 @@ import java.util.Map;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 
-import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
-import com.comphenix.protocol.events.PacketContainer;
 
-public class OffhandAttack extends JavaPlugin implements CommandExecutor {
+public class OffhandAttack extends JavaPlugin {
 
-    protected static OffhandAttack instance;
-
+    public static OffhandAttack instance;
+    
+    public static ProtocolManager protocolManager;
+    
     public static OffhandAttack getInstance() {
         return instance;
-    }
-    
-    private ProtocolManager protocolManager;
-
-    private boolean hasProtocolLib() {
-        PluginManager pluginManager = Bukkit.getPluginManager();
-        Plugin plugin = pluginManager.getPlugin("ProtocolLib");
-        return plugin != null && plugin.isEnabled();
-    }
+    }  
 
     @Override
     public void onEnable() {
     	instance = this;
-    	instance.getCommand("ohatk").setExecutor(instance);
+    	instance.getCommand("ohatk").setExecutor(new Executor());
+    	getServer().getPluginManager().registerEvents(new AttackEvent(), this);
     	TabCompleter cmpltr = getCommand("ohatk").getTabCompleter();
         if (cmpltr == null) {
         	getCommand("ohatk").setTabCompleter(new TabComplete());
@@ -92,6 +76,12 @@ public class OffhandAttack extends JavaPlugin implements CommandExecutor {
 
 		}
     }
+    
+    private boolean hasProtocolLib() {
+        PluginManager pluginManager = Bukkit.getPluginManager();
+        Plugin plugin = pluginManager.getPlugin("ProtocolLib");
+        return plugin != null && plugin.isEnabled();
+    }
 
     @Override
     public void onDisable() {
@@ -101,18 +91,5 @@ public class OffhandAttack extends JavaPlugin implements CommandExecutor {
 
     public ProtocolManager getProtocolManager() {
         return protocolManager;
-    }
-
-    public void animateOffHand(Player player) {
-        try {
-            PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.ANIMATION);
-            packet.getIntegers().write(0, player.getEntityId());
-            packet.getIntegers().write(1, 3); // 3 is code for second hand swing animation.
-            for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-                protocolManager.sendServerPacket(onlinePlayer, packet);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }

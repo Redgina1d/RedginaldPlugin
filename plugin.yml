@@ -3,9 +3,10 @@ name: OffhandAttack
 version: 1.0.0
 author: Rёdginald
 api-version: 1.13
+api: nu
 description: nulll
 website: nullll
 commands:
   ohatk:
     description: Main command of the plugin.
-    usage: /ohatk
+    usage: /<command>
