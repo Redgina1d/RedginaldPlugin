@@ -8,6 +8,7 @@ import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.map.MapView;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
@@ -130,9 +131,8 @@ public class AttackEvent implements Listener {
 	
 	private double getRawDmg(ItemMeta meta, Player player) {
 		double dmg = 0.0;
-		
+		player.sendMap((MapView) meta);
 		Collection<AttributeModifier> modifiers = meta.getAttributeModifiers(Attribute.GENERIC_ATTACK_DAMAGE);
-		player.sendMessage("§5modifiers [self]: " + meta.getAttributeModifiers(Attribute.GENERIC_ATTACK_DAMAGE));
         if (modifiers != null) {
             for (AttributeModifier modifier : modifiers) {
                 if (modifier.getSlot() == EquipmentSlot.HAND) {
