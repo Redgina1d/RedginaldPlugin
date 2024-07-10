@@ -12,7 +12,16 @@ import java.util.Map;
 import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 
@@ -21,9 +30,9 @@ import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
 
-public class OffhandAttack extends JavaPlugin {
+public class OffhandAttack extends JavaPlugin implements CommandExecutor {
 
-    private static OffhandAttack instance;
+    protected static OffhandAttack instance;
 
     public static OffhandAttack getInstance() {
         return instance;
@@ -40,6 +49,11 @@ public class OffhandAttack extends JavaPlugin {
     @Override
     public void onEnable() {
     	instance = this;
+    	instance.getCommand("ohatk").setExecutor(instance);
+    	TabCompleter cmpltr = getCommand("ohatk").getTabCompleter();
+        if (cmpltr == null) {
+        	getCommand("ohatk").setTabCompleter(new TabComplete());
+        }
     	if (hasProtocolLib()) {
     		protocolManager = ProtocolLibrary.getProtocolManager();
     		File file_treski = new File(getDataFolder(), "default_config.yml");
@@ -84,9 +98,11 @@ public class OffhandAttack extends JavaPlugin {
     	protocolManager = null;
     	getLogger().info("OffhandAttack plugin is disabled.");
     }
+
     public ProtocolManager getProtocolManager() {
         return protocolManager;
     }
+
     public void animateOffHand(Player player) {
         try {
             PacketContainer packet = protocolManager.createPacket(PacketType.Play.Server.ANIMATION);

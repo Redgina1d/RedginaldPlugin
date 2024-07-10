@@ -56,9 +56,9 @@ public class AttackEvent extends OffhandAttack implements Listener {
 	private boolean weaponCheck(ItemStack item) {
 		if (item.getType() != Material.AIR && item.hasItemMeta()) {
 			ItemMeta meta = item.getItemMeta();
-			NamespacedKey key = new NamespacedKey("offhand_atk", "1");
+			NamespacedKey key = new NamespacedKey(this, "offhand_atk");
 			PersistentDataContainer container = meta.getPersistentDataContainer();
-			if (container.has(key, PersistentDataType.STRING)) {
+			if (container.has(key)) {
                 return true;
             } else {
             	return false;
