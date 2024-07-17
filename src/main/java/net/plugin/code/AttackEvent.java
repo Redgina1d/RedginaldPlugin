@@ -44,7 +44,19 @@ import org.bukkit.attribute.AttributeModifier;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 
+import org.bukkit.NamespacedKey;
+
 public class AttackEvent implements Listener {
+	
+	public static final NamespacedKey DMG_MELEE_PHYSICAL = new NamespacedKey(OffhandAttack.instance, "dmg_mel_phy");
+	public static final NamespacedKey DMG_MELEE_MAGICAL = new NamespacedKey(OffhandAttack.instance, "dmg_mel_mgc");
+	public static final NamespacedKey DMG_MELEE_POISON = new NamespacedKey(OffhandAttack.instance, "dmg_mel_psn");
+	public static final NamespacedKey DMG_MELEE_FIRE = new NamespacedKey(OffhandAttack.instance, "dmg_mel_fir");
+	public static final NamespacedKey DMG_MELEE_ICE = new NamespacedKey(OffhandAttack.instance, "dmg_mel_ice");
+	public static final NamespacedKey DMG_MELEE_LIGHT = new NamespacedKey(OffhandAttack.instance, "dmg_mel_lig");
+	public static final NamespacedKey DMG_MELEE_PURE = new NamespacedKey(OffhandAttack.instance, "dmg_mel_pur");
+
+	public static final NamespacedKey ATK_CD = new NamespacedKey(OffhandAttack.instance, "atk_cd");
 	
 	@EventHandler
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
@@ -52,16 +64,20 @@ public class AttackEvent implements Listener {
 		Entity entity = event.getRightClicked();
 		Random random = new Random();
 		Location ent_loc = entity.getLocation();
-		animateOffHand(player);
 		LivingEntity ent_liv = (LivingEntity) entity;
 		if (player.getCooldown(Material.KNOWLEDGE_BOOK) == 0) {
+			animateOffHand(player);
 			if (weaponCheck(player.getInventory().getItemInOffHand())) {
-				
 				if (invulnerableCheck(entity)) {
 					float pit = 0.9f + (1.1f - 0.9f) * random.nextFloat();
 					ent_loc.getWorld().playSound(ent_loc, Sound.ENTITY_PLAYER_ATTACK_NODAMAGE, 1.0f, pit);
 				} else {
 					player.setCooldown(Material.KNOWLEDGE_BOOK, getCdOffhand(player));
+					for (int i = 0; i <= getDmgOffhand(player).length; i++ ) {
+						if (getDmgOffhand(player)[i] != 0) {
+							
+						}
+					}
 					ent_liv.damage(getDmgOffhand(player), player);
 					player.sendMessage("Damage dealt: " + Double.toString(getDmgOffhand(player)));
 					player.sendMessage("Cool Dawn: " + getCdOffhand(player));
@@ -110,44 +126,26 @@ public class AttackEvent implements Listener {
 			return false;
 		}
 	}
-	///// THIS CLASS DEFINES PLAYER'S GENERIC ATTACK DAMAGE, SUBTRACTS VALUE PROVIDED BY MAINHAND ITEM FROM IT AND THEN ADDS VALUE PROVIDED BY OFFHAND ITEM /////
-	private double getDmgOffhand(Player player) {
-        double attribute = player.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE).getValue();
-        player.sendMessage("§eplayer.getAttribute [113]: " + Double.toString(attribute));
-        double finaldmg = 0.0;
-        if (player.getInventory().getItemInMainHand().getItemMeta() != null) {
-        	if (attribute != 0) {
-            	double f = (attribute - getRawDmg(player.getInventory().getItemInMainHand().getItemMeta(), player));
-            	player.sendMessage("§e(player.getAttribute - mainhand dmg) [118]: " + Double.toString(f));
-            	finaldmg = (f + getRawDmg(player.getInventory().getItemInOffHand().getItemMeta(), player));
-            	player.sendMessage("§e(previous + offhand dmg) [121]: " + Double.toString(finaldmg));
-            } else {
-            	finaldmg = getRawDmg(player.getInventory().getItemInOffHand().getItemMeta(), player);
-            	player.sendMessage("§eelse: offhand dmg [124]: " + Double.toString(finaldmg));
-            }
-        }
+	private double[] getDmgOffhand(Player player) {
+		double[] finaldmg = new double[7];
+		ItemMeta meta = player.getInventory().getItemInOffHand().getItemMeta();
+		if (meta != null) {
+            PersistentDataContainer data = meta.getPersistentDataContainer();
+            finaldmg[0] = data.get(DMG_MELEE_PHYSICAL, PersistentDataType.DOUBLE);
+            finaldmg[1] = data.get(DMG_MELEE_MAGICAL, PersistentDataType.DOUBLE);
+            finaldmg[2] = data.get(DMG_MELEE_POISON, PersistentDataType.DOUBLE);
+            finaldmg[3] = data.get(DMG_MELEE_FIRE, PersistentDataType.DOUBLE);
+            finaldmg[4] = data.get(DMG_MELEE_ICE, PersistentDataType.DOUBLE);
+            finaldmg[5] = data.get(DMG_MELEE_LIGHT, PersistentDataType.DOUBLE);
+            finaldmg[6] = data.get(DMG_MELEE_PURE, PersistentDataType.DOUBLE);
+		}
 		return finaldmg;
     }
-	
-	private double getRawDmg(ItemMeta meta, Player player) {
-		double dmg = 0.0;
-		player.sendMap((MapView) meta);
-		Collection<AttributeModifier> modifiers = meta.getAttributeModifiers(Attribute.GENERIC_ATTACK_DAMAGE);
-        if (modifiers != null) {
-            for (AttributeModifier modifier : modifiers) {
-                if (modifier.getSlot() == EquipmentSlot.HAND) {
-                    dmg += modifier.getAmount();
-                }
-            }
-        }
-		return dmg;
-	}
-	
-	
+
 	private boolean isCrit(Player player) {
 		double loc1 = player.getLocation().getY();
 		try {
-			Thread.sleep(20);
+			Thread.sleep(200);
 		} catch (InterruptedException  e) {
 		}
 		double loc2 = player.getLocation().getY();
@@ -159,13 +157,15 @@ public class AttackEvent implements Listener {
 	}
 	
 	private int getCdOffhand(Player player) {
-		int a = 0;
-		double attribute = player.getAttribute(Attribute.GENERIC_ATTACK_SPEED).getValue();
-		if (player.getInventory().getItemInMainHand().getItemMeta() != null) {
-			double speed = (attribute - getRawSpeed(player.getInventory().getItemInMainHand().getItemMeta().getAttributeModifiers(EquipmentSlot.HAND)) + getRawSpeed(player.getInventory().getItemInOffHand().getItemMeta().getAttributeModifiers(EquipmentSlot.HAND)));
-			a += (1 / speed * 20);
+		double atr = player.getAttribute(Attribute.GENERIC_ATTACK_SPEED).getValue();
+		int cd = 0;
+		ItemMeta meta = player.getInventory().getItemInOffHand().getItemMeta();
+		if (meta != null) {
+            PersistentDataContainer data = meta.getPersistentDataContainer();
+            double d = data.get(ATK_CD, PersistentDataType.DOUBLE);
+            cd = (int) ((int) (1 / atr) + (int) (1 / d) * 10);
 		}
-		return a;
+		return cd;
 	} 
 	private int[] getGeneralYmlData() {
 		OffhandAttack plugin = (OffhandAttack) Bukkit.getPluginManager().getPlugin("OffhandAttack");
