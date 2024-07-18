@@ -48,15 +48,6 @@ import org.bukkit.NamespacedKey;
 
 public class AttackEvent implements Listener {
 	
-	public static final NamespacedKey DMG_MELEE_PHYSICAL = new NamespacedKey(OffhandAttack.instance, "dmg_mel_phy");
-	public static final NamespacedKey DMG_MELEE_MAGICAL = new NamespacedKey(OffhandAttack.instance, "dmg_mel_mgc");
-	public static final NamespacedKey DMG_MELEE_POISON = new NamespacedKey(OffhandAttack.instance, "dmg_mel_psn");
-	public static final NamespacedKey DMG_MELEE_FIRE = new NamespacedKey(OffhandAttack.instance, "dmg_mel_fir");
-	public static final NamespacedKey DMG_MELEE_ICE = new NamespacedKey(OffhandAttack.instance, "dmg_mel_ice");
-	public static final NamespacedKey DMG_MELEE_LIGHT = new NamespacedKey(OffhandAttack.instance, "dmg_mel_lig");
-	public static final NamespacedKey DMG_MELEE_PURE = new NamespacedKey(OffhandAttack.instance, "dmg_mel_pur");
-
-	public static final NamespacedKey ATK_CD = new NamespacedKey(OffhandAttack.instance, "atk_cd");
 	
 	@EventHandler
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
@@ -73,14 +64,11 @@ public class AttackEvent implements Listener {
 					ent_loc.getWorld().playSound(ent_loc, Sound.ENTITY_PLAYER_ATTACK_NODAMAGE, 1.0f, pit);
 				} else {
 					player.setCooldown(Material.KNOWLEDGE_BOOK, getCdOffhand(player));
-					for (int i = 0; i <= getDmgOffhand(player).length; i++ ) {
-						if (getDmgOffhand(player)[i] != 0) {
-							
-						}
+					if (getDmgOffhand(player) != 0) {
+						ent_liv.damage(getDmgOffhand(player), player);
+						player.sendMessage("Damage dealt: " + Double.toString(getDmgOffhand(player)));
+						player.sendMessage("Cool Dawn: " + getCdOffhand(player));
 					}
-					ent_liv.damage(getDmgOffhand(player), player);
-					player.sendMessage("Damage dealt: " + Double.toString(getDmgOffhand(player)));
-					player.sendMessage("Cool Dawn: " + getCdOffhand(player));
 				}
 			}
 		}
@@ -126,18 +114,13 @@ public class AttackEvent implements Listener {
 			return false;
 		}
 	}
-	private double[] getDmgOffhand(Player player) {
-		double[] finaldmg = new double[7];
+	private double getDmgOffhand(Player player) {
+		NamespacedKey key = new NamespacedKey(OffhandAttack.instance, "offhand_dmg");
+		double finaldmg = 0.0;
 		ItemMeta meta = player.getInventory().getItemInOffHand().getItemMeta();
 		if (meta != null) {
             PersistentDataContainer data = meta.getPersistentDataContainer();
-            finaldmg[0] = data.get(DMG_MELEE_PHYSICAL, PersistentDataType.DOUBLE);
-            finaldmg[1] = data.get(DMG_MELEE_MAGICAL, PersistentDataType.DOUBLE);
-            finaldmg[2] = data.get(DMG_MELEE_POISON, PersistentDataType.DOUBLE);
-            finaldmg[3] = data.get(DMG_MELEE_FIRE, PersistentDataType.DOUBLE);
-            finaldmg[4] = data.get(DMG_MELEE_ICE, PersistentDataType.DOUBLE);
-            finaldmg[5] = data.get(DMG_MELEE_LIGHT, PersistentDataType.DOUBLE);
-            finaldmg[6] = data.get(DMG_MELEE_PURE, PersistentDataType.DOUBLE);
+            finaldmg = data.get(key, PersistentDataType.DOUBLE);
 		}
 		return finaldmg;
     }
@@ -157,13 +140,12 @@ public class AttackEvent implements Listener {
 	}
 	
 	private int getCdOffhand(Player player) {
-		double atr = player.getAttribute(Attribute.GENERIC_ATTACK_SPEED).getValue();
+		NamespacedKey key2 = new NamespacedKey(OffhandAttack.instance, "offhand_cd");
 		int cd = 0;
 		ItemMeta meta = player.getInventory().getItemInOffHand().getItemMeta();
 		if (meta != null) {
             PersistentDataContainer data = meta.getPersistentDataContainer();
-            double d = data.get(ATK_CD, PersistentDataType.DOUBLE);
-            cd = (int) ((int) (1 / atr) + (int) (1 / d) * 10);
+            cd = data.get(key2, PersistentDataType.INTEGER);
 		}
 		return cd;
 	} 
@@ -202,20 +184,5 @@ public class AttackEvent implements Listener {
 		} catch (Exception e) {
 		}
 		return arr;
-	}
-	private double getRawSpeed(Multimap<Attribute, AttributeModifier> map) {
-		if (map == null) {
-			return 0.0;
-		} else {
-			double speed = 0.0;
-			for (Attribute attr : map.keys()) {
-                if (attr == Attribute.GENERIC_ATTACK_SPEED) {
-                    for (AttributeModifier modifier : map.get(attr)) {
-                    	speed += modifier.getAmount();
-                    }
-                }
-            }
-			return speed;
-		}
 	}
 }
