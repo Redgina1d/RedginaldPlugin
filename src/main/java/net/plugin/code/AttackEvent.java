@@ -2,28 +2,13 @@ package net.plugin.code;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
-import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.map.MapView;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.Plugin;
-
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
-import com.google.common.collect.Multimap;
-
-import java.awt.print.Printable;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.nio.file.Path;
-import java.util.Collection;
-import java.util.Map;
 import java.util.Random;
 
 import org.bukkit.Bukkit;
@@ -37,14 +22,6 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 
 import org.bukkit.Sound;
-import org.bukkit.attribute.Attribute;
-import org.bukkit.attribute.AttributeInstance;
-import org.bukkit.attribute.AttributeModifier;
-
-import org.yaml.snakeyaml.Yaml;
-import org.yaml.snakeyaml.constructor.Constructor;
-
-import org.bukkit.NamespacedKey;
 
 public class AttackEvent implements Listener {
 	
@@ -63,7 +40,7 @@ public class AttackEvent implements Listener {
 					float pit = 0.9f + (1.1f - 0.9f) * random.nextFloat();
 					ent_loc.getWorld().playSound(ent_loc, Sound.ENTITY_PLAYER_ATTACK_NODAMAGE, 1.0f, pit);
 				} else {
-					player.setCooldown(Material.KNOWLEDGE_BOOK, getCdOffhand(player));
+					player.setCooldown(Material.KNOWLEDGE_BOOK, 25);
 					if (getDmgOffhand(player) != 0) {
 						ent_liv.damage(getDmgOffhand(player), player);
 						player.sendMessage("Damage dealt: " + Double.toString(getDmgOffhand(player)));
@@ -120,11 +97,14 @@ public class AttackEvent implements Listener {
 		ItemMeta meta = player.getInventory().getItemInOffHand().getItemMeta();
 		if (meta != null) {
             PersistentDataContainer data = meta.getPersistentDataContainer();
-            finaldmg = data.get(key, PersistentDataType.DOUBLE);
+			if (data.has(key)) {
+				finaldmg = data.get(key, PersistentDataType.DOUBLE);
+			}
 		}
 		return finaldmg;
-    }
-
+	}
+		
+	/*
 	private boolean isCrit(Player player) {
 		double loc1 = player.getLocation().getY();
 		try {
@@ -138,17 +118,22 @@ public class AttackEvent implements Listener {
 			return false;
 		}
 	}
+	*/
 	
 	private int getCdOffhand(Player player) {
-		NamespacedKey key2 = new NamespacedKey(OffhandAttack.instance, "offhand_cd");
 		int cd = 0;
+	    NamespacedKey key2 = new NamespacedKey(OffhandAttack.instance, "offhand_cd");
 		ItemMeta meta = player.getInventory().getItemInOffHand().getItemMeta();
 		if (meta != null) {
             PersistentDataContainer data = meta.getPersistentDataContainer();
-            cd = data.get(key2, PersistentDataType.INTEGER);
+            if (data.has(key2)) {
+            	cd = data.get(key2, PersistentDataType.INTEGER);
+            }
+            
 		}
 		return cd;
-	} 
+	}
+	/*
 	private int[] getGeneralYmlData() {
 		OffhandAttack plugin = (OffhandAttack) Bukkit.getPluginManager().getPlugin("OffhandAttack");
 
@@ -185,4 +170,5 @@ public class AttackEvent implements Listener {
 		}
 		return arr;
 	}
+	*/
 }

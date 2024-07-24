@@ -11,7 +11,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
 public class Executor implements CommandExecutor {
-
+	
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
     	switch (label.toLowerCase()) {
@@ -30,12 +30,13 @@ public class Executor implements CommandExecutor {
     	Player player = (Player) sender;
 			if (player.getInventory().getItemInMainHand().getType() != Material.AIR) {
 				NamespacedKey key = new NamespacedKey(OffhandAttack.instance, "offhand_dmg");
-				NamespacedKey key2 = new NamespacedKey(OffhandAttack.instance, "offhand_cd");
+    		    NamespacedKey key2 = new NamespacedKey(OffhandAttack.instance, "offhand_cd");
 	    		if (args[1].equals("add") && Double.parseDouble(args[2]) != 0 && Integer.parseInt(args[3]) != 0) {
+	    		    
 	    			player.getInventory().setItemInMainHand(setEngrave(player.getInventory().getItemInMainHand(),(short) 1));
 	    			player.getInventory().getItemInMainHand().getItemMeta().getPersistentDataContainer().set(key, PersistentDataType.DOUBLE, Double.parseDouble(args[2]));
-	    			player.getInventory().getItemInMainHand().getItemMeta().getPersistentDataContainer().set(key2, PersistentDataType.INTEGER, Integer.parseInt(args[2]));
-	        		player.sendMessage("§6§l[OffhandAttack] §e- A special engrave was applied to your item. Now it can be swinged using second hand. Offhand damage for this item: " + args[2] + ". Cooldown for this item (in ticks): " + args[3]);
+	    			player.getInventory().getItemInMainHand().getItemMeta().getPersistentDataContainer().set(key2, PersistentDataType.INTEGER, Integer.parseInt(args[3]));
+	        		player.sendMessage("§6§l[OffhandAttack] §e- A special engrave was applied to your item. Now it can be swinged using second hand. Offhand damage for this item: " + player.getInventory().getItemInMainHand().getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.DOUBLE).toString() + ". Cooldown for this item (in ticks): " + player.getInventory().getItemInMainHand().getItemMeta().getPersistentDataContainer().get(key, PersistentDataType.INTEGER).toString());
 	        		return true;
 	    		} else if (args[1].equals("remove")) {
 	    			player.getInventory().setItemInMainHand(setEngrave(player.getInventory().getItemInMainHand(),(short) 0));
@@ -65,5 +66,7 @@ public class Executor implements CommandExecutor {
     	}
     	return item;
 	}
+    
+
 
 }
