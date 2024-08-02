@@ -129,13 +129,6 @@
       	<artifactId>FastAsyncWorldEdit-Core</artifactId>
       	<scope>provided</scope>
     	</dependency>
-    	
-    	<dependency>
-	    	<groupId>com.github.AnhyDev</groupId>
-	    	<artifactId>AnhyLibAPI</artifactId>
-	    	<version>v1.4.0</version>
-            <scope>provided</scope>
-		</dependency>
 
     	<dependency>
         	<groupId>com.fastasyncworldedit</groupId>
