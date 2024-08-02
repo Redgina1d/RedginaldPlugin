@@ -1,4 +1,4 @@
-package net.plugin.code;
+package net.plugins.main;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TabComplete implements TabCompleter {
+public class OhatkTabComplete implements TabCompleter {
     
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
@@ -17,6 +17,12 @@ public class TabComplete implements TabCompleter {
     		if (args.length == 1) {
                 completions.add("engrave");
                 completions.add("manage");
+    		}
+    		if (args.length == 2) {
+    			if (args[0].equals("engrave")) {
+    				completions.add("add");
+    				completions.add("remove");
+    			}
     		}
         }
 		return completions;

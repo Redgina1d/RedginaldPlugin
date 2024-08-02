@@ -1,4 +1,4 @@
-package net.plugin.code;
+package net.plugins.main;
 
 import org.bukkit.plugin.java.JavaPlugin;
 import org.yaml.snakeyaml.DumperOptions;
@@ -19,14 +19,14 @@ import org.bukkit.plugin.PluginManager;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 
-public class OffhandAttack extends JavaPlugin {
+public class RedginaldPlugin extends JavaPlugin {
 	
-    public static OffhandAttack instance;
+    public static RedginaldPlugin instance;
 
     public static ProtocolManager protocolManager;
     
     
-    public static OffhandAttack getInstance() {
+    public static RedginaldPlugin getInstance() {
         return instance;
     }  
     
@@ -36,10 +36,15 @@ public class OffhandAttack extends JavaPlugin {
     	instance = this;
     	
     	instance.getCommand("ohatk").setExecutor(new Executor());
+    	instance.getCommand("annihilate").setExecutor(new Executor());
     	getServer().getPluginManager().registerEvents(new AttackEvent(), this);
     	TabCompleter cmpltr = getCommand("ohatk").getTabCompleter();
+    	TabCompleter cmpltr2 = getCommand("annihilate").getTabCompleter();
         if (cmpltr == null) {
-        	getCommand("ohatk").setTabCompleter(new TabComplete());
+        	getCommand("ohatk").setTabCompleter(new OhatkTabComplete());
+        }
+        if (cmpltr2 == null) {
+        	getCommand("annihilate").setTabCompleter(new AnnihilateTabCompleter());
         }
     	if (hasProtocolLib()) {
     		protocolManager = ProtocolLibrary.getProtocolManager();
@@ -72,9 +77,9 @@ public class OffhandAttack extends JavaPlugin {
 					getLogger().log(Level.SEVERE, "ERROR: Failed to create file", e);
 				}
             }
-    		getLogger().info("OffhandAttack plugin is enabled. Enjoy the fun, my little Barbarians.");
+    		getLogger().info("Redginald Plugins are enabled.");
     	} else {
-    		getLogger().warning("You don't have ProtocolLib on your server! Disabling OffhandAttack plugin...");
+    		getLogger().warning("You don't have ProtocolLib on your server! Disabling plugin...");
     		Bukkit.getPluginManager().disablePlugin(Bukkit.getPluginManager().getPlugin("OffhandAttack"));
 
 		}
@@ -89,7 +94,7 @@ public class OffhandAttack extends JavaPlugin {
     @Override
     public void onDisable() {
     	protocolManager = null;
-    	getLogger().info("OffhandAttack plugin is disabled.");
+    	getLogger().info("Redginald Plugins are disabled.");
     }
 
     public ProtocolManager getProtocolManager() {

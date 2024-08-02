@@ -1,12 +1,15 @@
-main: net.plugin.code.OffhandAttack
-name: OffhandAttack
+main: net.plugins.main.RedginaldPlugin
+name: RedginaldPlugin
 version: 1.0.0
 author: Rёdginald
 api-version: 1.13
-api: nu
-description: nulll
-website: nullll
+api: idk
+description: Some utilities for Wealth server made by me.
+website: nulll
 commands:
   ohatk:
-    description: Main command of the plugin.
+    description: Manages Offhand Attack functions.
+    usage: /<command>
+  annihilate:
+    description: Empty all containers (or pack animals) in area selected using FAWE.
     usage: /<command>

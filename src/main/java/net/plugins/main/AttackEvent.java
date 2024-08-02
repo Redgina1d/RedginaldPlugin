@@ -1,4 +1,4 @@
-package net.plugin.code;
+package net.plugins.main;
 
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -9,6 +9,9 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.wrappers.nbt.NbtCompound;
+import com.comphenix.protocol.wrappers.nbt.NbtFactory;
+
 import java.util.Random;
 
 import org.bukkit.Bukkit;
@@ -25,6 +28,7 @@ import org.bukkit.Sound;
 
 public class AttackEvent implements Listener {
 	
+	private RedginaldPlugin plugin;
 	
 	@EventHandler
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
@@ -33,18 +37,19 @@ public class AttackEvent implements Listener {
 		Random random = new Random();
 		Location ent_loc = entity.getLocation();
 		LivingEntity ent_liv = (LivingEntity) entity;
+		ItemStack item = player.getInventory().getItemInOffHand();
 		if (player.getCooldown(Material.KNOWLEDGE_BOOK) == 0) {
 			animateOffHand(player);
-			if (weaponCheck(player.getInventory().getItemInOffHand())) {
+			if (weaponCheck(item)) {
 				if (invulnerableCheck(entity)) {
 					float pit = 0.9f + (1.1f - 0.9f) * random.nextFloat();
 					ent_loc.getWorld().playSound(ent_loc, Sound.ENTITY_PLAYER_ATTACK_NODAMAGE, 1.0f, pit);
 				} else {
-					player.setCooldown(Material.KNOWLEDGE_BOOK, 25);
-					if (getDmgOffhand(player) != 0) {
-						ent_liv.damage(getDmgOffhand(player), player);
-						player.sendMessage("Damage dealt: " + Double.toString(getDmgOffhand(player)));
-						player.sendMessage("Cool Dawn: " + getCdOffhand(player));
+					player.setCooldown(Material.KNOWLEDGE_BOOK, getCdOffhand(item));
+					if (getDmgOffhand(item) != 0) {
+						ent_liv.damage(getDmgOffhand(item), player);
+						player.sendMessage("Damage dealt: " + Double.toString(getDmgOffhand(item)));
+						player.sendMessage("Cool Dawn: " + getCdOffhand(item));
 					}
 				}
 			}
@@ -53,11 +58,11 @@ public class AttackEvent implements Listener {
 
 	 public void animateOffHand(Player player) {
 	        try {
-	            PacketContainer packet = OffhandAttack.protocolManager.createPacket(PacketType.Play.Server.ANIMATION);
+	            PacketContainer packet = RedginaldPlugin.protocolManager.createPacket(PacketType.Play.Server.ANIMATION);
 	            packet.getIntegers().write(0, player.getEntityId());
 	            packet.getIntegers().write(1, 3); // 3 is code for second hand swing animation.
 	            for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-	            	OffhandAttack.protocolManager.sendServerPacket(onlinePlayer, packet);
+	            	RedginaldPlugin.protocolManager.sendServerPacket(onlinePlayer, packet);
 	            }
 	        } catch (Exception e) {
 	            e.printStackTrace();
@@ -79,29 +84,24 @@ public class AttackEvent implements Listener {
 	}
 	private boolean weaponCheck(ItemStack item) {
 		if (item.getType() != Material.AIR && item.hasItemMeta()) {
-			ItemMeta meta = item.getItemMeta();
-			NamespacedKey key = new NamespacedKey(OffhandAttack.instance, "offhand_atk");
-			PersistentDataContainer container = meta.getPersistentDataContainer();
-			if (container.has(key)) {
-                return true;
-            } else {
-            	return false;
-            }
+			NbtCompound compound = NbtFactory.asCompound(NbtFactory.fromItemTag(item));
+			plugin.getLogger().warning("NbtCompound: " + compound.toString());
+			if (compound.containsKey("offhand_atk")) {
+				return true;
+			} else {
+				return false;
+			}
 		} else {
 			return false;
 		}
 	}
-	private double getDmgOffhand(Player player) {
-		NamespacedKey key = new NamespacedKey(OffhandAttack.instance, "offhand_dmg");
-		double finaldmg = 0.0;
-		ItemMeta meta = player.getInventory().getItemInOffHand().getItemMeta();
-		if (meta != null) {
-            PersistentDataContainer data = meta.getPersistentDataContainer();
-			if (data.has(key)) {
-				finaldmg = data.get(key, PersistentDataType.DOUBLE);
-			}
+	private double getDmgOffhand(ItemStack item) {
+		NbtCompound compound = NbtFactory.asCompound(NbtFactory.fromItemTag(item));
+		if (compound.containsKey("offhand_atk")) {
+			return compound.getDouble("offhand_atk");
+		} else {
+			return 0;	
 		}
-		return finaldmg;
 	}
 		
 	/*
@@ -120,18 +120,13 @@ public class AttackEvent implements Listener {
 	}
 	*/
 	
-	private int getCdOffhand(Player player) {
-		int cd = 0;
-	    NamespacedKey key2 = new NamespacedKey(OffhandAttack.instance, "offhand_cd");
-		ItemMeta meta = player.getInventory().getItemInOffHand().getItemMeta();
-		if (meta != null) {
-            PersistentDataContainer data = meta.getPersistentDataContainer();
-            if (data.has(key2)) {
-            	cd = data.get(key2, PersistentDataType.INTEGER);
-            }
-            
+	private int getCdOffhand(ItemStack item) {
+		NbtCompound compound = NbtFactory.asCompound(NbtFactory.fromItemTag(item));
+		if (compound.containsKey("offhand_cd")) {
+			return compound.getInteger("offhand_cd");
+		} else {
+			return 0;	
 		}
-		return cd;
 	}
 	/*
 	private int[] getGeneralYmlData() {
