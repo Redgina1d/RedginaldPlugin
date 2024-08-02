@@ -24,6 +24,10 @@ public class OhatkTabComplete implements TabCompleter {
     				completions.add("remove");
     			}
     		}
+    		if (args.length == 5) {
+    			completions.add("true");
+    			completions.add("false");
+    		}
         }
 		return completions;
     }

@@ -48,6 +48,7 @@ public class Executor implements CommandExecutor {
 	    		if (args[1].equals("add") && Double.parseDouble(args[2]) != 0 && Integer.parseInt(args[3]) != 0) {
 	    			compound.put("offhand_atk", Double.parseDouble(args[2]));
 	    			compound.put("offhand_cd", Integer.parseInt(args[3]));
+	    			if (args[4].equals("true"))
 	    			NbtFactory.setItemTag(item, compound);
 	        		player.sendMessage("§6§l[OffhandAttack] §e- A special engrave was applied to your item. Now it can be swinged using second hand. Offhand damage for this item: " + args[2] + ". Cooldown for this item (in ticks): " + args[3] );
 	        		return true;

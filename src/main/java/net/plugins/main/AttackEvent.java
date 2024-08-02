@@ -3,6 +3,7 @@ package net.plugins.main;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
@@ -23,9 +24,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.Sound;
 
 public class AttackEvent implements Listener {
-	
-	private RedginaldPlugin plugin;
-	
+
 	@EventHandler
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
 		Player player = event.getPlayer();
@@ -35,34 +34,31 @@ public class AttackEvent implements Listener {
 		LivingEntity ent_liv = (LivingEntity) entity;
 		ItemStack item = player.getInventory().getItemInOffHand();
 		if (player.getCooldown(Material.KNOWLEDGE_BOOK) == 0) {
-			animateOffHand(player);
 			if (weaponCheck(item)) {
+				animateOffHand(player);
 				if (invulnerableCheck(entity)) {
 					float pit = 0.9f + (1.1f - 0.9f) * random.nextFloat();
 					ent_loc.getWorld().playSound(ent_loc, Sound.ENTITY_PLAYER_ATTACK_NODAMAGE, 1.0f, pit);
 				} else {
 					player.setCooldown(Material.KNOWLEDGE_BOOK, getCdOffhand(item));
 					if (getDmgOffhand(item) != 0) {
-						ent_liv.damage(getDmgOffhand(item), player);
-						player.sendMessage("Damage dealt: " + Double.toString(getDmgOffhand(item)));
-						player.sendMessage("Cool Dawn: " + getCdOffhand(item));
+						if (isSweep(player)) {
+							ent_liv.damage(getDmgOffhand(item), player);
+						}
+						
 					}
 				}
 			}
 		}
 	}
 
-	 public void animateOffHand(Player player) {
-	        try {
-	            PacketContainer packet = RedginaldPlugin.protocolManager.createPacket(PacketType.Play.Server.ANIMATION);
-	            packet.getIntegers().write(0, player.getEntityId());
-	            packet.getIntegers().write(1, 3); // 3 is code for second hand swing animation.
-	            for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
-	            	RedginaldPlugin.protocolManager.sendServerPacket(onlinePlayer, packet);
-	            }
-	        } catch (Exception e) {
-	            e.printStackTrace();
-	        }
+	public void animateOffHand(Player player) {
+		 PacketContainer packet = RedginaldPlugin.protocolManager.createPacket(PacketType.Play.Server.ANIMATION);
+		 packet.getIntegers().write(0, player.getEntityId());
+		 packet.getIntegers().write(1, 3); // 3 is code for second hand swing animation.
+		 for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+			 RedginaldPlugin.protocolManager.sendServerPacket(onlinePlayer, packet);
+			 }
 	    }
 
 	private boolean invulnerableCheck(Entity entity) {
@@ -81,7 +77,6 @@ public class AttackEvent implements Listener {
 	private boolean weaponCheck(ItemStack item) {
 		if (item.getType() != Material.AIR && item.hasItemMeta()) {
 			NbtCompound compound = NbtFactory.asCompound(NbtFactory.fromItemTag(item));
-			plugin.getLogger().warning("NbtCompound: " + compound.toString());
 			if (compound.containsKey("offhand_atk")) {
 				return true;
 			} else {
@@ -100,13 +95,11 @@ public class AttackEvent implements Listener {
 		}
 	}
 		
-	/*
 	private boolean isCrit(Player player) {
 		double loc1 = player.getLocation().getY();
 		try {
 			Thread.sleep(200);
-		} catch (InterruptedException  e) {
-		}
+		} catch (InterruptedException  e) {}
 		double loc2 = player.getLocation().getY();
 		if (loc1 > loc2) {
 			return true;
@@ -114,7 +107,18 @@ public class AttackEvent implements Listener {
 			return false;
 		}
 	}
-	*/
+	private boolean isSweep(Player player) {
+		if (!player.isSprinting()) {
+			if (player.getVelocity().getY() == 0) {
+				//if ()
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return false;
+		}
+	}
 	
 	private int getCdOffhand(ItemStack item) {
 		NbtCompound compound = NbtFactory.asCompound(NbtFactory.fromItemTag(item));

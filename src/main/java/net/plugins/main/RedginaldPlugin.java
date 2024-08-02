@@ -94,7 +94,7 @@ public class RedginaldPlugin extends JavaPlugin {
     @Override
     public void onDisable() {
     	protocolManager = null;
-    	getLogger().info("Redginald Plugins are disabled.");
+    	getLogger().info("Redginald Plugin is disabled.");
     }
 
     public ProtocolManager getProtocolManager() {
