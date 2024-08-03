@@ -3,25 +3,28 @@ package net.plugins.main;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.nbt.NbtCompound;
 import com.comphenix.protocol.wrappers.nbt.NbtFactory;
 
+import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.util.Vector;
 
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-
 import org.bukkit.Sound;
+import org.bukkit.Particle;
+import org.bukkit.World;
 
 public class AttackEvent implements Listener {
 
@@ -31,21 +34,43 @@ public class AttackEvent implements Listener {
 		Entity entity = event.getRightClicked();
 		Random random = new Random();
 		Location ent_loc = entity.getLocation();
+		World wow = player.getWorld();
 		LivingEntity ent_liv = (LivingEntity) entity;
 		ItemStack item = player.getInventory().getItemInOffHand();
+		float pit = 0.9f + (1.1f - 0.9f) * random.nextFloat();
 		if (player.getCooldown(Material.KNOWLEDGE_BOOK) == 0) {
 			if (weaponCheck(item)) {
 				animateOffHand(player);
 				if (invulnerableCheck(entity)) {
-					float pit = 0.9f + (1.1f - 0.9f) * random.nextFloat();
-					ent_loc.getWorld().playSound(ent_loc, Sound.ENTITY_PLAYER_ATTACK_NODAMAGE, 1.0f, pit);
+					wow.playSound(ent_loc.add(0, 1.2, 0), Sound.ENTITY_PLAYER_ATTACK_NODAMAGE, 1.0f, pit);
 				} else {
 					player.setCooldown(Material.KNOWLEDGE_BOOK, getCdOffhand(item));
 					if (getDmgOffhand(item) != 0) {
-						if (isSweep(player)) {
+						if (getAtkType(player) == 0) {
+							ent_liv.damage(getDmgOffhand(item), player);
+							wow.spawnParticle(Particle.SWEEP_ATTACK, ent_loc.add(0, 1.2, 0), 1, 0.05, 0.05, 0.05);
+							wow.playSound(ent_loc.add(0, 1.2, 0), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1.0f, pit);
+							List<LivingEntity> nearbyMobs = wow.getNearbyEntities(ent_loc, 1.0, 0.25, 1.0)
+				                    .stream()
+				                    .filter(near -> near instanceof LivingEntity)
+				                    .filter(near -> !near.getName().equals(player.getName()))
+				                    .map(near -> (LivingEntity) near)
+				                    .collect(Collectors.toList());
+							for (LivingEntity nearby : nearbyMobs) {
+								nearby.damage(1.0, player);
+							}
+						} else if (getAtkType(player) == 2) {
+							ent_liv.damage((getDmgOffhand(item) * 1.5), player);
+							wow.spawnParticle(Particle.CRIT, ent_loc.add(0, 1.2, 0), 10, 0.6, 0.6, 0.6);
+							wow.playSound(ent_loc.add(0, 1.2, 0), Sound.ENTITY_PLAYER_ATTACK_CRIT, 1.0f, pit);
+						} else if (getAtkType(player) == 1) {
+							Vector dir = player.getLocation().getDirection().normalize().multiply(1.1);
+							ent_liv.damage(getDmgOffhand(item), player);
+							ent_liv.setVelocity(dir);
+							wow.playSound(ent_loc.add(0, 1.2, 0), Sound.ENTITY_PLAYER_ATTACK_KNOCKBACK, 1.0f, pit);
+						} else if (getAtkType(player) == 3) {
 							ent_liv.damage(getDmgOffhand(item), player);
 						}
-						
 					}
 				}
 			}
@@ -94,32 +119,36 @@ public class AttackEvent implements Listener {
 			return 0;	
 		}
 	}
-		
-	private boolean isCrit(Player player) {
-		double loc1 = player.getLocation().getY();
-		try {
-			Thread.sleep(200);
-		} catch (InterruptedException  e) {}
-		double loc2 = player.getLocation().getY();
-		if (loc1 > loc2) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-	private boolean isSweep(Player player) {
-		if (!player.isSprinting()) {
-			if (player.getVelocity().getY() == 0) {
-				//if ()
-				return true;
-			} else {
-				return false;
-			}
-		} else {
-			return false;
-		}
-	}
 	
+	// 0 = sweep
+	// 1 = knock
+	// 2 = crit
+	// 3 = common (no sweep & other effects, used for axe-like weapons
+	private short getAtkType(Player player) {
+		if (!player.isSprinting()) {
+			double loc1 = player.getLocation().getY();
+			try {
+				Thread.sleep(200);
+			} catch (InterruptedException  e) {}
+			double loc2 = player.getLocation().getY();
+				if (loc1 > loc2) {
+					return 2;
+				} else {
+					NbtCompound compound = NbtFactory.asCompound(NbtFactory.fromItemTag(player.getInventory().getItemInMainHand()));
+					if (compound.containsKey("offhand_sweep")) {
+						if (compound.getShort("offhand_sweep") == 0) {
+							return 3;
+						}
+					} else {
+						return 0;
+					}
+				}
+		} else {
+			return 1;
+		}
+		return 5;
+		
+	}
 	private int getCdOffhand(ItemStack item) {
 		NbtCompound compound = NbtFactory.asCompound(NbtFactory.fromItemTag(item));
 		if (compound.containsKey("offhand_cd")) {
