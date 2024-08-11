@@ -129,6 +129,7 @@
       	<artifactId>FastAsyncWorldEdit-Core</artifactId>
       	<scope>provided</scope>
     	</dependency>
+    	
 
     	<dependency>
         	<groupId>com.fastasyncworldedit</groupId>

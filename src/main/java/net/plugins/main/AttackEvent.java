@@ -48,9 +48,16 @@ public class AttackEvent implements Listener {
 					if (getDmgOffhand(item) != 0) {
 						if (getAtkType(player) == 0) {
 							ent_liv.damage(getDmgOffhand(item), player);
-							wow.spawnParticle(Particle.SWEEP_ATTACK, ent_loc.add(0, 1.2, 0), 1, 0.05, 0.05, 0.05);
+							Vector vec = player.getLocation().toVector().multiply(0.5);
+							Location lok = new Location(
+									wow,
+									vec.getX(),
+									vec.getY(),
+									vec.getZ()
+					        );
+							wow.spawnParticle(Particle.SWEEP_ATTACK, lok, 1, 0.05, 0.05, 0.05);
 							wow.playSound(ent_loc.add(0, 1.2, 0), Sound.ENTITY_PLAYER_ATTACK_SWEEP, 1.0f, pit);
-							List<LivingEntity> nearbyMobs = wow.getNearbyEntities(ent_loc, 1.0, 0.25, 1.0)
+							List<LivingEntity> nearbyMobs = wow.getNearbyEntities(ent_loc, 1.5, 0.25, 1.5)
 				                    .stream()
 				                    .filter(near -> near instanceof LivingEntity)
 				                    .filter(near -> !near.getName().equals(player.getName()))
@@ -61,12 +68,12 @@ public class AttackEvent implements Listener {
 							}
 						} else if (getAtkType(player) == 2) {
 							ent_liv.damage((getDmgOffhand(item) * 1.5), player);
-							wow.spawnParticle(Particle.CRIT, ent_loc.add(0, 1.2, 0), 10, 0.6, 0.6, 0.6);
+							wow.spawnParticle(Particle.CRIT, ent_loc.add(0, 1.2, 0), 10, 0.35, 0.35, 0.35);
 							wow.playSound(ent_loc.add(0, 1.2, 0), Sound.ENTITY_PLAYER_ATTACK_CRIT, 1.0f, pit);
 						} else if (getAtkType(player) == 1) {
-							Vector dir = player.getLocation().getDirection().normalize().multiply(1.1);
+							Vector dir = player.getLocation().getDirection().normalize().multiply(1.01);
 							ent_liv.damage(getDmgOffhand(item), player);
-							ent_liv.setVelocity(dir);
+							ent_liv.setVelocity(ent_liv.getVelocity().add(dir));
 							wow.playSound(ent_loc.add(0, 1.2, 0), Sound.ENTITY_PLAYER_ATTACK_KNOCKBACK, 1.0f, pit);
 						} else if (getAtkType(player) == 3) {
 							ent_liv.damage(getDmgOffhand(item), player);
@@ -157,6 +164,7 @@ public class AttackEvent implements Listener {
 			return 0;	
 		}
 	}
+	// One day, in the future, I'll do this...
 	/*
 	private int[] getGeneralYmlData() {
 		OffhandAttack plugin = (OffhandAttack) Bukkit.getPluginManager().getPlugin("OffhandAttack");

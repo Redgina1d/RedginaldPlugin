@@ -9,6 +9,15 @@ import org.bukkit.inventory.ItemStack;
 import com.comphenix.protocol.wrappers.nbt.NbtCompound;
 import com.comphenix.protocol.wrappers.nbt.NbtFactory;
 
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldedit.extent.Extent;
+import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.world.block.BlockState;
+
+import org.bukkit.Location;
+import org.bukkit.block.Block;
+import org.bukkit.block.Container;
 
 public class Executor implements CommandExecutor {
 	
@@ -24,7 +33,7 @@ public class Executor implements CommandExecutor {
 		}
 		case "annihilate": {
 			if (args.length > 0) {
-				return false;//WIP
+				return annihilateCmd(sender, args);
 			} else {
 				return false;
 			}
@@ -33,13 +42,43 @@ public class Executor implements CommandExecutor {
 			return false;
     	}
     }
-    /*
+
     private boolean annihilateCmd(CommandSender sender, String[] args) {
     	Player player = (Player) sender;
-    	if (player.hasP)
+    	org.bukkit.World buk_world = player.getWorld();
+    	if (player.hasPermission("containerbutcher")) {
+    		Region rg = BukkitAdapter.adapt(player).getSelection();
+    		if (rg != null) {
+    			Extent ext = rg.getWorld();
+    			Thread th = new Thread(() -> {
+    				player.sendMessage("§c§lStarting §call container emptying in selected area...");
+    				for (BlockVector3 position : rg) {
+    		            BlockState bl_we = ext.getBlock(position);
+    		            if (bl_we.getMaterial().hasContainer()) {
+    		            	Location lok = new Location(buk_world, position.x(), position.y(), position.z());
+    		            	Block bl_buk = lok.getBlock();
+    		            	if (bl_buk.getState() instanceof Container) {
+    		                    Container con = (Container) bl_buk.getState();
+    		                    con.getInventory().clear();
+    		                }
+    		            }
+    		        }
+    	        });
+    			
+    			th.start();
+    		        try {
+    		            th.join();
+    		            player.sendMessage("§a§lSuccess!");
+    		        } catch (InterruptedException e) {
+    		            e.printStackTrace();
+    		            player.sendMessage("§c§cERROR.");
+    		        }
+    		        return true;
+    		}
+    	}
 		return false;
     }
-    */
+
     private boolean engraveCmd(CommandSender sender, String[] args) {
     	Player player = (Player) sender;
 			if (player.getInventory().getItemInMainHand().getType() != Material.AIR) {
