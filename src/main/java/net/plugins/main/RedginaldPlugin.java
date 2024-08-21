@@ -47,6 +47,7 @@ public class RedginaldPlugin extends JavaPlugin {
         	getCommand("annihilate").setTabCompleter(new AnnihilateTabCompleter());
         }
     	if (hasProtocolLib()) {
+    		/*
     		protocolManager = ProtocolLibrary.getProtocolManager();
     		File file_treski = new File(getDataFolder(), "default_config.yml");
             if (!file_treski.exists()) {
@@ -77,10 +78,12 @@ public class RedginaldPlugin extends JavaPlugin {
 					getLogger().log(Level.SEVERE, "ERROR: Failed to create file", e);
 				}
             }
-    		getLogger().info("Redginald Plugins are enabled.");
+            */
+    		getLogger().info("Redginald Plugin is enabled.");
+    		
     	} else {
     		getLogger().warning("You don't have ProtocolLib on your server! Disabling plugin...");
-    		Bukkit.getPluginManager().disablePlugin(Bukkit.getPluginManager().getPlugin("OffhandAttack"));
+    		Bukkit.getPluginManager().disablePlugin(Bukkit.getPluginManager().getPlugin("RedginaldPlugin"));
 
 		}
     }
