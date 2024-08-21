@@ -50,8 +50,7 @@ public class Executor implements CommandExecutor {
     		Region rg = BukkitAdapter.adapt(player).getSelection();
     		if (rg != null) {
     			Extent ext = rg.getWorld();
-    			Thread th = new Thread(() -> {
-    				player.sendMessage("§c§lStarting §call container emptying in selected area...");
+    				player.sendMessage("§c§l[Container Butcher] §c- §lStarting §call container emptying in selected area...");
     				for (BlockVector3 position : rg) {
     		            BlockState bl_we = ext.getBlock(position);
     		            if (bl_we.getMaterial().hasContainer()) {
@@ -63,17 +62,8 @@ public class Executor implements CommandExecutor {
     		                }
     		            }
     		        }
-    	        });
-    			
-    			th.start();
-    		        try {
-    		            th.join();
-    		            player.sendMessage("§a§lSuccess!");
-    		        } catch (InterruptedException e) {
-    		            e.printStackTrace();
-    		            player.sendMessage("§c§cERROR.");
-    		        }
-    		        return true;
+    				player.sendMessage("§c§l[Container Butcher] §c- §a§lDone!");
+    				return true;
     		}
     	}
 		return false;
