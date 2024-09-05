@@ -25,7 +25,6 @@ public class RedginaldPlugin extends JavaPlugin {
 
     public static ProtocolManager protocolManager;
     
-    
     public static RedginaldPlugin getInstance() {
         return instance;
     }  
@@ -47,8 +46,8 @@ public class RedginaldPlugin extends JavaPlugin {
         	getCommand("annihilate").setTabCompleter(new AnnihilateTabCompleter());
         }
     	if (hasProtocolLib()) {
-    		/*
     		protocolManager = ProtocolLibrary.getProtocolManager();
+    		/*
     		File file_treski = new File(getDataFolder(), "default_config.yml");
             if (!file_treski.exists()) {
             	try {

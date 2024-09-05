@@ -59,6 +59,7 @@ public class Executor implements CommandExecutor {
     		            	if (bl_buk.getState() instanceof Container) {
     		                    Container con = (Container) bl_buk.getState();
     		                    con.getInventory().clear();
+    		                    
     		                }
     		            }
     		        }
